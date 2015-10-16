@@ -6,10 +6,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.animation.LinearInterpolator;
-import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.Scroller;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -52,6 +52,14 @@ public class NineSlide extends ViewGroup implements View.OnLongClickListener {
      */
     private float mXPoint;
 
+    /**
+     * 容器宽和高
+     */
+    private int mWidth;
+    private int mHeight;
+
+    private NineDragController mController;
+
     public NineSlide(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initView();
@@ -69,7 +77,10 @@ public class NineSlide extends ViewGroup implements View.OnLongClickListener {
 
     private void initView(){
         mScroller = new Scroller(getContext(),new LinearInterpolator());
+    }
 
+    public void setController(NineDragController mController){
+        this.mController = mController;
     }
 
     /**
@@ -92,27 +103,26 @@ public class NineSlide extends ViewGroup implements View.OnLongClickListener {
              int screenX = screenCount%3;
              int screenY = screenCount/3;
 
-             int childWidth = width/3;
-             int childHeight = (b-t)/3;
+             int childWidth = mWidth/3;
+             int childHeight = mHeight/3;
 
-             int left = screen * width + l + screenX * childWidth;
-             int right = screen * width + l + (screenX + 1) * childWidth;
+             int left = screen * mWidth + l + screenX * childWidth;
+             int right = screen * mWidth + l + (screenX + 1) * childWidth;
              int top = t + screenY * childHeight;
-             int buttom = t + (screenY + 1) * childHeight;
+             int bottom = t + (screenY + 1) * childHeight;
 
-             child.layout(left, top, right, buttom);
+             child.layout(left, top, right, bottom);
 
-             if(DEBUG) Log.d(TAG,"Screen="+screen+"/left="+left+"/rigth="+right+"/top="+top+"/buttom="+buttom);
+             if(DEBUG) Log.d(TAG,"Screen="+screen+"/left="+left+"/rigth="+right+"/top="+top+"/buttom="+bottom);
          }
     }
-
-    private int width;
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        width = MeasureSpec.getSize(widthMeasureSpec);
+        this.mWidth = MeasureSpec.getSize(widthMeasureSpec);
+        this.mHeight = MeasureSpec.getSize(heightMeasureSpec);
 
         int childCount = getChildCount();
         int screen = childCount/9;
@@ -193,6 +203,12 @@ public class NineSlide extends ViewGroup implements View.OnLongClickListener {
     @Override
     public boolean onLongClick(View v) {
         Toast.makeText(getContext(),"LongClick...",Toast.LENGTH_SHORT).show();
+        ViewParent vp = getParent();
+        if(vp!=null && vp instanceof NineDragLayout){
+            TextView tv = new TextView(getContext());
+            tv.setText("999");
+            ((NineDragLayout) vp).addView(tv);
+        }
         return true;
     }
 
